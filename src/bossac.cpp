@@ -53,6 +53,7 @@ public:
     bool read;
     bool verify;
     bool offset;
+    bool maxSize;
     bool reset;
     bool port;
     bool boot;
@@ -69,6 +70,7 @@ public:
 
     int readArg;
     int offsetArg;
+    int maxSizeArg;
     string portArg;
     int bootArg;
     int bodArg;
@@ -97,6 +99,7 @@ BossaConfig::BossaConfig()
 
     readArg = 0;
     offsetArg = 0;
+    maxSizeArg = 0;
     bootArg = 1;
     bodArg = 1;
     borArg = 1;
@@ -184,6 +187,12 @@ static Option opts[] =
       { ArgRequired, ArgInt, "OFFSET", { &config.offsetArg } },
       "start erase/write/read/verify operation at flash OFFSET;\n"
       "OFFSET must be aligned to a flash page boundary"
+    },
+    {
+      'M', "maxsize", &config.maxSize,
+      { ArgRequired, ArgInt, "MAXSIZE", { &config.maxSizeArg } },
+      "set the maximum upload size to MAXSIZE;\n"
+      "leave this blank to use chip default"
     },
     {
       'p', "port", &config.port,
@@ -414,7 +423,7 @@ main(int argc, char* argv[])
         if (config.write)
         {
             timer_start();
-            flasher.write(argv[args], config.offsetArg);
+            flasher.write(argv[args], config.offsetArg, config.maxSizeArg);
             printf("\nDone in %5.3f seconds\n", timer_stop());
         }
 
@@ -424,7 +433,7 @@ main(int argc, char* argv[])
             uint32_t totalErrors;
 
             timer_start();
-            if (!flasher.verify(argv[args], pageErrors, totalErrors, config.offsetArg))
+            if (!flasher.verify(argv[args], pageErrors, totalErrors, config.offsetArg, config.maxSizeArg))
             {
                 printf("\nVerify failed\nPage errors: %d\nByte errors: %d\n",
                     pageErrors, totalErrors);
@@ -437,7 +446,7 @@ main(int argc, char* argv[])
         if (config.read)
         {
             timer_start();
-            flasher.read(argv[args], config.readArg, config.offsetArg);
+            flasher.read(argv[args], config.readArg, config.offsetArg, config.maxSizeArg);
             printf("\nDone in %5.3f seconds\n", timer_stop());
         }
 

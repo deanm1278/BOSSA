@@ -79,7 +79,7 @@ Flasher::erase(uint32_t foffset)
 }
 
 void
-Flasher::write(const char* filename, uint32_t foffset)
+Flasher::write(const char* filename, uint32_t foffset, uint32_t fmaxSize)
 {
     FILE* infile;
     uint32_t pageSize = _flash->pageSize();
@@ -103,7 +103,8 @@ Flasher::write(const char* filename, uint32_t foffset)
         rewind(infile);
 
         numPages = (fsize + pageSize - 1) / pageSize;
-        if (numPages > _flash->numPages())
+        if ((fmaxSize != 0 && numPages > fmaxSize / pageSize) ||
+            (fmaxSize == 0 && numPages > _flash->numPages()))
             throw FileSizeError();
 
         _observer.onStatus("Write %ld bytes to flash (%u pages)\n", fsize, numPages);
@@ -160,7 +161,7 @@ Flasher::write(const char* filename, uint32_t foffset)
 }
 
 bool
-Flasher::verify(const char* filename, uint32_t& pageErrors, uint32_t& totalErrors, uint32_t foffset)
+Flasher::verify(const char* filename, uint32_t& pageErrors, uint32_t& totalErrors, uint32_t foffset, uint32_t fmaxSize)
 {
     FILE* infile;
     uint32_t pageSize = _flash->pageSize();
@@ -195,7 +196,8 @@ Flasher::verify(const char* filename, uint32_t& pageErrors, uint32_t& totalError
         rewind(infile);
 
         numPages = (fsize + pageSize - 1) / pageSize;
-        if (numPages > _flash->numPages())
+        if ((fmaxSize != 0 && numPages > fmaxSize / pageSize) ||
+            (fmaxSize == 0 && numPages > _flash->numPages()))
             throw FileSizeError();
 
         _observer.onStatus("Verify %ld bytes of flash\n", fsize);
@@ -263,7 +265,7 @@ Flasher::verify(const char* filename, uint32_t& pageErrors, uint32_t& totalError
 }
 
 void
-Flasher::read(const char* filename, uint32_t fsize, uint32_t foffset)
+Flasher::read(const char* filename, uint32_t fsize, uint32_t foffset, uint32_t fmaxSize)
 {
     FILE* outfile;
     uint32_t pageSize = _flash->pageSize();
@@ -282,8 +284,9 @@ Flasher::read(const char* filename, uint32_t fsize, uint32_t foffset)
         fsize = pageSize * (_flash->numPages() - pageOffset);
 
     numPages = (fsize + pageSize - 1) / pageSize;
-    if (pageOffset + numPages > _flash->numPages())
-        throw FileSizeError();
+    if ((fmaxSize != 0 && pageOffset + numPages > fmaxSize / pageSize) ||
+        (fmaxSize == 0 && pageOffset + numPages > _flash->numPages()))
+            throw FileSizeError();
     
     outfile = fopen(filename, "wb");
     if (!outfile)

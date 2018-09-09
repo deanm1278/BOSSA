@@ -1,3 +1,10 @@
+## New in this fork
+The ability to override the hardcoded max size of a given chip is added
+```
+  -M, --maxsize=MAXSIZE set the maximum upload size to MAXSIZE;
+                        leave this blank to use chip default
+```
+
 BOSSA 1.9.1
 -----------
 

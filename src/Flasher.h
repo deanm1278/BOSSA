@@ -95,9 +95,9 @@ public:
     virtual ~Flasher() {}
 
     void erase(uint32_t foffset);
-    void write(const char* filename, uint32_t foffset = 0);
-    bool verify(const char* filename, uint32_t& pageErrors, uint32_t& totalErrors, uint32_t foffset = 0);
-    void read(const char* filename, uint32_t fsize, uint32_t foffset = 0);
+    void write(const char* filename, uint32_t foffset = 0, uint32_t fmaxSize = 0);
+    bool verify(const char* filename, uint32_t& pageErrors, uint32_t& totalErrors, uint32_t foffset = 0, uint32_t fmaxSize = 0);
+    void read(const char* filename, uint32_t fsize, uint32_t foffset = 0, uint32_t fmaxSize = 0);
     void lock(std::string& regionArg, bool enable);
     void info(FlasherInfo& info);
 
